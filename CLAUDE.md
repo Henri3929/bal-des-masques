@@ -34,4 +34,4 @@ Jeu narratif solo en 3D, vue à la première personne, dans le château d'une é
 5. Les autres salles, une par une
 
 ## Étape en cours
-Étape 1 : faite. Étape 2 : faite (Grande Salle de nuit, bougies flottantes, jeu installable). Étape 3 : à démarrer.
+Étape 1 : faite. Étape 2 : faite (Grande Salle, bougies flottantes, jeu installable). Étape 3 : faite (8 personnages : Léo, Maëlle, Hugo, Zoé, Noah, Clara, Victor, Elsa ; figurants gris ; dialogues de présentation ; bouton jour/nuit provisoire). Étape 4 : à démarrer.

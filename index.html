@@ -26,6 +26,28 @@
     #aide { pointer-events: none; justify-content: flex-end; padding-bottom: calc(40px + env(safe-area-inset-bottom)); opacity: 0; z-index: 1; }
     #aide p { background: rgba(10,8,16,.6); padding: 10px 16px; border-radius: 20px; margin: 4px; font-size: .95rem; }
     .cache { opacity: 0 !important; pointer-events: none !important; }
+
+    /* bulle de dialogue */
+    #dialogue { position: fixed; inset: 0; z-index: 3; display: flex; align-items: flex-end; justify-content: center;
+      padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); box-sizing: border-box; transition: opacity .3s; }
+    #dialogue .bulle { position: relative; width: 100%; max-width: 560px; background: rgba(14,10,20,.88); border: 1px solid rgba(232,207,140,.45);
+      border-radius: 14px; padding: 14px 16px 16px; box-sizing: border-box; box-shadow: 0 6px 30px rgba(0,0,0,.6); }
+    #dialogue .nom { font-weight: bold; font-size: 1.05rem; margin-bottom: 6px; letter-spacing: .03em; }
+    #dialogue .texte { font-size: 1.02rem; line-height: 1.45; min-height: 2.9em; }
+    #dialogue .texte em { opacity: .7; }
+    #dialogue .texte.apparait { animation: apparait .35s ease-out; }
+    @keyframes apparait { from { opacity: 0; transform: translateY(4px); } }
+    #dialogue .choix { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+    #dialogue .choix:empty { display: none; }
+    #dialogue .choix button { font: inherit; font-size: .98rem; color: #f3e6c8; text-align: left; background: rgba(232,207,140,.1);
+      border: 1px solid rgba(232,207,140,.35); border-radius: 10px; padding: 10px 12px; cursor: pointer; animation: apparait .3s ease-out; }
+    #dialogue .choix button:active { background: rgba(232,207,140,.3); }
+    #dialogue .suite { position: absolute; right: 14px; bottom: 8px; font-size: .8rem; opacity: .7; animation: pulse 1.4s ease-in-out infinite; }
+
+    /* bouton jour / nuit (pour tester) */
+    #moment { position: fixed; top: calc(12px + env(safe-area-inset-top)); right: 12px; z-index: 1; width: 46px; height: 46px;
+      border-radius: 50%; border: 1px solid rgba(232,207,140,.45); background: rgba(14,10,20,.6); font-size: 1.4rem;
+      line-height: 1; cursor: pointer; transition: opacity .3s; }
   </style>
   <script type="importmap">
     { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }
@@ -43,7 +65,10 @@
   <div id="aide" class="ecran">
     <p>Touche le sol pour marcher</p>
     <p>Glisse le doigt pour regarder</p>
+    <p>Touche quelqu'un pour lui parler</p>
   </div>
+
+  <button id="moment" class="cache" aria-label="Jour ou nuit">🌙</button>
 
   <script type="module">
     const accueil = document.getElementById('accueil');
@@ -55,8 +80,14 @@
       const { construireGrandeSalle } = await import('./salles/grande-salle.js');
       const jeu = demarrer(document.getElementById('jeu'), construireGrandeSalle);
       entrer.textContent = "Touche l'écran pour entrer";
+      const bouton = document.getElementById('moment');
+      const majBouton = () => { bouton.textContent = jeu.moment === 'jour' ? '🌙' : '☀️'; };
+      bouton.addEventListener('click', () => { jeu.reglerMoment(jeu.moment === 'jour' ? 'nuit' : 'jour'); majBouton(); });
+      jeu.surDialogue = (ouvert) => bouton.classList.toggle('cache', ouvert);
+      majBouton();
       accueil.addEventListener('click', () => {
         accueil.classList.add('cache');
+        bouton.classList.remove('cache');
         aide.style.opacity = 1;
         jeu.controles.surPremierGeste = () => setTimeout(() => aide.classList.add('cache'), 1500);
       }, { once: true });
