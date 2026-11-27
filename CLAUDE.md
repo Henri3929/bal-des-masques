@@ -5,6 +5,7 @@
 - Aucune création ni modification sans que j'écrive « let's go ». Avant : on discute, tu proposes.
 - Je ne sais pas coder : réponses courtes, tutoiement, tutos pas à pas très simples pour tout ce que je dois faire moi-même.
 - Une étape = une session. À la fin d'une étape, mets à jour « Étape en cours ».
+- À la fin de chaque étape, crée toi-même la pull request : je n'ai plus qu'à toucher « Merge ».
 - Modifie seulement les fichiers nécessaires. Ne lis docs/scenario-v1.md que si l'étape en a besoin.
 
 ## Concept
@@ -34,4 +35,4 @@ Jeu narratif solo en 3D, vue à la première personne, dans le château d'une é
 5. Les autres salles, une par une
 
 ## Étape en cours
-Étape 1 : faite. Étape 2 : faite (Grande Salle de nuit, bougies flottantes, jeu installable). Étape 3 : à démarrer.
+Étape 1 : faite. Étape 2 : faite (Grande Salle, bougies flottantes, jeu installable). Étape 3 : faite (8 personnages : Léo, Maëlle, Hugo, Zoé, Noah, Clara, Victor, Elsa ; figurants gris ; dialogues de présentation ; bouton jour/nuit provisoire). Étape 4 : à démarrer.

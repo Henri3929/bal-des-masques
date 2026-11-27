@@ -1,4 +1,4 @@
-// La Grande Salle : longue salle en pierre, la nuit.
+// La Grande Salle : longue salle en pierre, de jour ou de nuit.
 // Deux grandes tables (Corbeval en rouge, Vélandre en bleu), l'estrade des professeurs,
 // une cheminée, de hautes fenêtres au clair de lune et des bougies qui flottent.
 import * as THREE from 'three';
@@ -175,7 +175,8 @@ export function construireGrandeSalle(scene) {
   const animations = [];
 
   // ---------- lumières ----------
-  scene.add(new THREE.HemisphereLight(0x4a5080, 0x2a1a10, 1.0));
+  const ciel = new THREE.HemisphereLight(0x4a5080, 0x2a1a10, 1.0);
+  scene.add(ciel);
   const lune = new THREE.DirectionalLight(0x9ab0ff, 0.8);
   lune.position.set(-10, 12, 4);
   scene.add(lune);
@@ -437,7 +438,36 @@ export function construireGrandeSalle(scene) {
     flammesTorches.forEach((f, i) => f.scale.set(1, 0.85 + Math.sin(t * 12 + i) * 0.15, 1));
   });
 
+  // ---------- jour / nuit ----------
+  function reglerMoment(moment) {
+    const jour = moment === 'jour';
+    ciel.color.set(jour ? 0xd8d4ea : 0x4a5080);
+    ciel.groundColor.set(jour ? 0x6a4a30 : 0x2a1a10);
+    ciel.intensity = jour ? 1.8 : 1.0;
+    lune.color.set(jour ? 0xffe6bf : 0x9ab0ff);
+    lune.intensity = jour ? 1.8 : 0.8;
+    M.vitre.color.set(jour ? 0xcfe2ff : 0x2e4880);
+    M.rayon.color.set(jour ? 0xffe2a0 : 0x7f9cff);
+    M.rayon.opacity = jour ? 0.09 : 0.05;
+    scene.fog.color.set(jour ? 0x2e2924 : 0x0b0a14);
+    scene.fog.near = jour ? 25 : 18;
+    scene.fog.far = jour ? 80 : 60;
+  }
+
+  // places assises sur les bancs, pour les figurants
+  const sieges = [];
+  for (const tx of [-4, 4]) for (const cote of [-1, 1]) {
+    for (let z = -11.2; z < 13.5; z += 1.1) sieges.push({ x: tx + cote, z, angle: -cote * Math.PI / 2 });
+  }
+
   return {
+    id: 'grande-salle',
+    reglerMoment,
+    sieges,
+    promenade: {
+      allee: { minX: -1, maxX: 1, minZ: -13.5, maxZ: 15 },
+      entree: { minX: -5.5, maxX: 5.5, minZ: 15.6, maxZ: 18 },
+    },
     cliquables,
     obstacles,
     limites: { minX: -LARGEUR / 2 + 0.75, maxX: LARGEUR / 2 - 0.75, minZ: -LONGUEUR / 2 + 0.6, maxZ: LONGUEUR / 2 - 0.6 },
