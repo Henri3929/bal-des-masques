@@ -33,4 +33,4 @@ Jeu narratif solo en 3D, vue à la première personne, dans le château d'une é
 5. Les autres salles, une par une
 
 ## Étape en cours
-Étape 1 : à démarrer.
+Étape 1 : faite (structure des dossiers et page d'accueil). Reste à activer GitHub Pages. Prochaine : étape 2.
