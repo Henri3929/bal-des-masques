@@ -37,4 +37,4 @@ Jeu narratif solo en 3D, vue à la première personne, dans le château d'une é
 6. Les autres salles, une par une
 
 ## Étape en cours
-Étape 1 : faite. Étape 2 : faite (Grande Salle, bougies flottantes, jeu installable). Étape 3 : faite (8 personnages : Léo, Maëlle, Hugo, Zoé, Noah, Clara, Victor, Elsa ; figurants gris ; dialogues de présentation ; bouton jour/nuit provisoire). Étape 4 : faite (joystick, fond sonore jour/nuit, bouton son). Étape 5 : à démarrer.
+Étape 1 : faite. Étape 2 : faite (Grande Salle, bougies flottantes, jeu installable). Étape 3 : faite (8 personnages : Léo, Maëlle, Hugo, Zoé, Noah, Clara, Victor, Elsa ; figurants gris ; dialogues de présentation ; bouton jour/nuit provisoire). Étape 4 : faite (joystick, fond sonore jour/nuit, bouton son). Étape 5 : faite (écran de départ prénom + fille/garçon, sauvegarde, calendrier 6 semaines × 4 moments, une vraie conversation par moment, jauges cachées, journal, rumeurs, échéances des intrigues, Grimaud la nuit ; Inès, Jade, Sacha ajoutées ; semaine 1 jouable, puis « À suivre »). Étape 6 : à démarrer (salles une par une, avec Morvan, Aldane, Grimaud, Ombre et les semaines 2 à 6).

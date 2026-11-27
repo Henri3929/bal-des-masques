@@ -137,6 +137,35 @@ export function geometriesSilhouette(o) {
       C.push(piece(cyl(0.21, 0.16, 0.17, 8), 0xcdd2dc, 0, yB + 0.57, 0));
       break;
     }
+    case 'carnet': { // carnet noir
+      if (!assis) {
+        C.push(piece(cube(0.05, 0.22, 0.16), 0x18161a, 0.31, yB - 0.04, 0.07, 0, 0, 0.12));
+        C.push(piece(cube(0.035, 0.2, 0.005), 0xe8dfc8, 0.31, yB - 0.04, 0.152, 0, 0, 0.12));
+      } else {
+        C.push(piece(cube(0.17, 0.035, 0.22), 0x18161a, 0, 0.86, 0.36));
+        C.push(piece(cube(0.15, 0.006, 0.2), 0xe8dfc8, 0, 0.88, 0.36));
+      }
+      break;
+    }
+    case 'ruban': { // ruban vert noué dans les cheveux
+      T.push(piece(bille(0.035), 0x2e9d5a, 0, hc + 0.07, -0.17));
+      for (const s of [-1, 1]) {
+        T.push(piece(cube(0.1, 0.065, 0.02), 0x2e9d5a, s * 0.06, hc + 0.08, -0.175, 0, 0, s * 0.35));
+        T.push(piece(cube(0.03, 0.16, 0.012), 0x24804a, s * 0.025, hc - 0.02, -0.18, 0, 0, s * 0.15));
+      }
+      break;
+    }
+    case 'chat': { // chat noir sur l'épaule
+      const cx = -0.25, cy = yB + 0.6;
+      C.push(piece(bille(0.1, 1), 0x161418, cx, cy, -0.03, 0, 0, 0, 0.9, 0.75, 1.25));
+      C.push(piece(bille(0.065, 1), 0x161418, cx, cy + 0.09, 0.1));
+      for (const s of [-1, 1]) {
+        C.push(piece(new THREE.ConeGeometry(0.022, 0.05, 4), 0x161418, cx + s * 0.035, cy + 0.155, 0.1));
+        C.push(piece(cube(0.016, 0.012, 0.01), 0xf2c232, cx + s * 0.024, cy + 0.1, 0.163));
+      }
+      C.push(piece(cyl(0.018, 0.012, 0.3, 5), 0x161418, cx - 0.04, cy - 0.15, -0.14, 0.35));
+      break;
+    }
     case 'plume': { // plume blanche dans les cheveux
       T.push(piece(new THREE.ConeGeometry(0.04, 0.36, 4), 0xf6f6fa, 0.14, hc + 0.18, -0.04, 0, 0, -0.5, 1, 1, 0.35));
       break;

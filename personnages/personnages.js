@@ -6,6 +6,8 @@
 //                 -90 = vers la gauche, 180 = vers la table des professeurs.
 //   pose : 'debout' ou 'assis'
 // S'il n'y a pas de ligne « nuit », le personnage n'est pas là la nuit.
+// On peut aussi écrire une ligne pour un moment précis : « matin », « apres-midi » ou « soir ».
+// Sinon, c'est la ligne « jour » qui sert.
 //
 // Dans la Grande Salle : table Corbeval en x = -4 (bancs en x = -5 et -3),
 // table Vélandre en x = 4 (bancs en x = 3 et 5). Pour s'asseoir, prendre z = -11.2 + n × 1.1.
@@ -72,6 +74,27 @@ export const personnages = [
     peau: 0xe0b090, cheveux: 0x3a2418, coiffure: 'boucles',
     emploi: { 'grande-salle': {
       jour: { x: 6.2, z: 16, orientation: -70, pose: 'debout' },
+    } },
+  },
+  {
+    id: 'ines', nom: 'Inès', maison: 'corbeval', objet: 'carnet',
+    peau: 0xecc4a0, cheveux: 0x1e1612, coiffure: 'long',
+    emploi: { 'grande-salle': {
+      jour: { x: -5, z: 6.4, orientation: 90, pose: 'assis' },
+    } },
+  },
+  {
+    id: 'jade', nom: 'Jade', maison: 'velandre', objet: 'ruban',
+    peau: 0xf2d6c0, cheveux: 0x101010, coiffure: 'queue',
+    emploi: { 'grande-salle': {
+      jour: { x: 5, z: 0.9, orientation: -90, pose: 'assis' },
+    } },
+  },
+  {
+    id: 'sacha', nom: 'Sacha', maison: 'velandre', objet: 'chat',
+    peau: 0xc99572, cheveux: 0xa06a3c, coiffure: 'boucles',
+    emploi: { 'grande-salle': {
+      jour: { x: 6.4, z: 9, orientation: -110, pose: 'debout' },
     } },
   },
 ];
