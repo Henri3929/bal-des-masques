@@ -5,6 +5,7 @@ import { creerActeurs } from './acteurs.js';
 import { creerFigurants } from './figurants.js';
 import { Dialogue } from './dialogue.js';
 import { Son } from './son.js';
+import { MAISONS } from '../personnages/personnages.js';
 
 export function demarrer(conteneur, construireSalle) {
   const rendu = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -35,12 +36,15 @@ export function demarrer(conteneur, construireSalle) {
     scene, camera, controles, son,
     surDialogue: null,      // prévenu quand une conversation s'ouvre ou se ferme
     get moment() { return moment; },
-    get enDialogue() { return !!interlocuteur; },
-    reglerMoment(m) {
+    histoire: null,         // l'histoire choisit ce que disent les personnages (moteur/histoire.js)
+    get enDialogue() { return !!interlocuteur || dialogue.ouvert; },
+    set partie(p) { dialogue.partie = p; },
+    // m : 'jour' ou 'nuit' ; creneau : 'matin', 'apres-midi', 'soir' ou 'nuit'
+    reglerMoment(m, creneau = m) {
       moment = m;
       controles.annulerParole();
       salle.reglerMoment?.(m);
-      acteurs.reglerMoment(m);
+      acteurs.reglerMoment(m, creneau);
       figurants.reglerMoment(m);
       son.reglerMoment(m);
       rendu.toneMappingExposure = m === 'jour' ? 1.2 : 1.1;
@@ -48,20 +52,39 @@ export function demarrer(conteneur, construireSalle) {
   };
   jeu.reglerMoment(moment);
 
-  controles.surParler = (acteur) => {
+  // ramène le joueur à la grande porte (quand le temps passe)
+  jeu.replacer = () => {
+    controles.annulerParole();
+    controles.position.set(salle.depart.x, 0, salle.depart.z);
+    controles.lacet = salle.depart.lacet ?? 0;
+    controles.tangage = 0;
+  };
+
+  function ouvrirBulle(o, acteur, quandFini) {
     interlocuteur = acteur;
     controles.enDialogue = true;
-    controles.regard = acteur.s.yeux;
+    controles.regard = acteur ? acteur.s.yeux : null;
     controles.lacherTout();
     son.attenuer(true);
     jeu.surDialogue?.(true);
-    dialogue.ouvrir(acteur.perso, moment, () => {
+    dialogue.ouvrir(o, () => {
       interlocuteur = null;
       controles.enDialogue = false;
       controles.regard = null;
       son.attenuer(false);
       jeu.surDialogue?.(false);
+      quandFini?.();
     });
+  }
+
+  // une scène racontée (sans personnage en face)
+  jeu.raconter = (o, quandFini) => ouvrirBulle({ ...o, recit: true }, null, quandFini);
+
+  controles.surParler = (acteur) => {
+    const p = acteur.perso;
+    const conv = jeu.histoire?.parler(p);
+    if (!conv) return;
+    ouvrirBulle({ nom: p.nom, couleur: MAISONS[p.maison]?.texte, noeuds: conv.noeuds }, acteur, conv.quandFini);
   };
 
   window.addEventListener('resize', () => {

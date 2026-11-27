@@ -1,7 +1,9 @@
 // La bulle de dialogue en bas de l'écran.
-// Lit les conversations dans scenario/dialogues.js.
-import { dialogues } from '../scenario/dialogues.js';
-import { MAISONS } from '../personnages/personnages.js';
+// Elle montre une suite de répliques (une conversation ou une scène racontée),
+// applique les effets (« fait ») et cache les choix impossibles (« si »).
+import { personnages, MAISONS } from '../personnages/personnages.js';
+
+const NARRATEUR = '#e8cf8c';
 
 function echapper(t) {
   return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -10,10 +12,14 @@ function echapper(t) {
 function miseEnForme(t) {
   return echapper(t).replace(/\(([^)]+)\)/g, '<em>($1)</em>');
 }
+function couleurDe(id) {
+  const p = personnages.find((q) => q.id === id);
+  return p ? MAISONS[p.maison]?.texte : null;
+}
 
 export class Dialogue {
   constructor() {
-    this.dejaVus = new Set();     // conversations déjà faites (oubliées en rechargeant, pour l'instant)
+    this.partie = null;
     this.fond = document.createElement('div');
     this.fond.id = 'dialogue';
     this.fond.className = 'cache';
@@ -33,46 +39,53 @@ export class Dialogue {
     this.ouvert = false;
   }
 
-  // Ouvre la conversation avec un personnage, au moment donné ('jour' ou 'nuit')
-  ouvrir(perso, moment, quandFini) {
-    const d = dialogues[perso.id]?.[moment] ?? dialogues[perso.id]?.jour;
+  // o : { nom, couleur, noeuds, recit }   recit = scène racontée (fond assombri)
+  ouvrir(o, quandFini) {
     this.quandFini = quandFini;
-    this.perso = perso;
-    const cle = `${perso.id}:${moment}`;
-    if (d && d.premiere && !this.dejaVus.has(cle)) {
-      this.dejaVus.add(cle);
-      this.noeuds = d.premiere;
-    } else {
-      const lignes = d?.ensuite?.length ? d.ensuite : ['…'];
-      this.noeuds = { debut: { dit: lignes[Math.floor(Math.random() * lignes.length)] } };
-    }
-    const maison = MAISONS[perso.maison];
-    this.elNom.textContent = perso.nom;
-    this.elNom.style.color = maison?.texte ?? '#e8cf8c';
+    this.noeuds = o.noeuds;
+    this.nomBase = o.nom ?? '';
+    this.couleurBase = o.couleur ?? NARRATEUR;
+    this.fond.classList.toggle('recit', !!o.recit);
     this.ouvert = true;
     this.fond.classList.remove('cache');
     this.montrer('debut');
   }
 
   montrer(id) {
-    const n = this.noeuds[id];
+    let n = this.noeuds[id];
+    // une réplique avec « si » : si la condition est fausse, on passe à « sinon »
+    let garde = 0;
+    while (n && n.si && !this.partie?.verifier(n.si) && garde++ < 20) n = this.noeuds[n.sinon];
     if (!n) { this.fermer(); return; }
     this.noeud = n;
+    this.partie?.appliquer(n.fait);
     this.pret = false;
-    this.elTexte.innerHTML = miseEnForme(n.dit);
+
+    const qui = n.qui ? personnages.find((p) => p.id === n.qui) : null;
+    this.elNom.textContent = qui ? qui.nom : (n.qui ?? this.nomBase);
+    this.elNom.style.color = (n.qui ? couleurDe(n.qui) : null) ?? (n.qui ? NARRATEUR : this.couleurBase);
+    this.elNom.style.display = this.elNom.textContent ? '' : 'none';
+
+    this.elTexte.innerHTML = miseEnForme(this.partie ? this.partie.texte(n.dit) : n.dit);
     this.elTexte.classList.remove('apparait');
     void this.elTexte.offsetWidth;
     this.elTexte.classList.add('apparait');
     this.elChoix.innerHTML = '';
     this.elSuite.style.visibility = 'hidden';
+    const choix = (n.choix ?? []).filter((c) => !this.partie || this.partie.verifier(c.si));
+    this.choixVisibles = choix;
     // petite pause pour ne pas sauter une réplique par erreur
     setTimeout(() => {
       this.pret = true;
-      if (n.choix) {
-        for (const c of n.choix) {
+      if (choix.length) {
+        for (const c of choix) {
           const b = document.createElement('button');
-          b.innerHTML = miseEnForme(c.dis);
-          b.addEventListener('click', (e) => { e.stopPropagation(); this.montrer(c.va); });
+          b.innerHTML = miseEnForme(this.partie ? this.partie.texte(c.dis) : c.dis);
+          b.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.partie?.appliquer(c.fait);
+            this.montrer(c.va);
+          });
           this.elChoix.appendChild(b);
         }
       } else {
@@ -83,7 +96,7 @@ export class Dialogue {
   }
 
   avancer() {
-    if (!this.ouvert || !this.pret || this.noeud.choix) return;
+    if (!this.ouvert || !this.pret || this.choixVisibles.length) return;
     if (this.noeud.va) this.montrer(this.noeud.va);
     else this.fermer();
   }
@@ -91,6 +104,8 @@ export class Dialogue {
   fermer() {
     this.ouvert = false;
     this.fond.classList.add('cache');
-    if (this.quandFini) this.quandFini();
+    const f = this.quandFini;
+    this.quandFini = null;
+    f?.();
   }
 }

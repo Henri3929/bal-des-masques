@@ -46,12 +46,14 @@ export function creerActeurs(scene, idSalle) {
     return s;
   }
 
-  function reglerMoment(moment) {
+  // moment : 'jour' ou 'nuit'. creneau : 'matin', 'apres-midi', 'soir' ou 'nuit'.
+  // On cherche d'abord une ligne pour le créneau précis (ex. « soir »), sinon « jour » / « nuit ».
+  function reglerMoment(moment, creneau = moment) {
     cliquables.length = 0;
     obstacles.length = 0;
     for (const a of acteurs) {
       for (const s of Object.values(a.modeles)) s.groupe.visible = false;
-      a.place = a.emploi[moment] ?? null;
+      a.place = a.emploi[creneau] ?? a.emploi[moment] ?? null;
       a.s = null;
       if (!a.place) continue;
       const s = modele(a, a.place.pose);
