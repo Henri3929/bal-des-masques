@@ -14,7 +14,8 @@ Jeu narratif solo en 3D, vue à la première personne, dans le château d'une é
 ## Technique
 - Appli web jouable sur téléphone, installable sur l'écran d'accueil, hébergée gratuitement sur GitHub Pages.
 - Three.js, style low-poly, léger pour mobile.
-- Contrôles tactiles sans flèches à l'écran : toucher le sol pour marcher, glisser le doigt pour regarder, toucher un personnage pour parler.
+- Contrôles tactiles : joystick sous le pouce gauche pour marcher (il apparaît là où on pose le pouce), glisser à droite pour regarder, toucher le sol pour y aller, toucher un personnage pour parler.
+- Fond sonore fabriqué par le code (Web Audio), sans fichier ; bouton pour couper le son.
 - Sauvegarde locale sur le téléphone, pas de serveur.
 - Assets gratuits (Kenney, Quaternius) si besoin, sinon formes simples.
 
@@ -31,8 +32,9 @@ Jeu narratif solo en 3D, vue à la première personne, dans le château d'une é
 1. Mise en place : structure des dossiers, GitHub Pages
 2. Prototype : la Grande Salle en 3D, déplacement et regard, testable sur téléphone
 3. 3-4 personnages avec leur objet distinctif, et les dialogues
-4. Branchement du scénario complet
-5. Les autres salles, une par une
+4. Joysticks et fond sonore
+5. Branchement du scénario complet
+6. Les autres salles, une par une
 
 ## Étape en cours
-Étape 1 : faite. Étape 2 : faite (Grande Salle, bougies flottantes, jeu installable). Étape 3 : faite (8 personnages : Léo, Maëlle, Hugo, Zoé, Noah, Clara, Victor, Elsa ; figurants gris ; dialogues de présentation ; bouton jour/nuit provisoire). Étape 4 : à démarrer.
+Étape 1 : faite. Étape 2 : faite (Grande Salle, bougies flottantes, jeu installable). Étape 3 : faite (8 personnages : Léo, Maëlle, Hugo, Zoé, Noah, Clara, Victor, Elsa ; figurants gris ; dialogues de présentation ; bouton jour/nuit provisoire). Étape 4 : faite (joystick, fond sonore jour/nuit, bouton son). Étape 5 : à démarrer.

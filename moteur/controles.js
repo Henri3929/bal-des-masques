@@ -1,5 +1,5 @@
-// Contrôles tactiles : toucher le sol pour marcher, glisser le doigt pour regarder,
-// toucher un personnage pour lui parler. Marche aussi à la souris sur ordinateur.
+// Contrôles tactiles : joystick sous le pouce gauche pour marcher, glisser à droite pour regarder,
+// toucher le sol pour y aller, toucher un personnage pour lui parler. Marche aussi à la souris sur ordinateur.
 import * as THREE from 'three';
 
 const HAUTEUR_YEUX = 1.65;
@@ -7,6 +7,7 @@ const VITESSE = 2.6;        // mètres par seconde
 const RAYON_JOUEUR = 0.35;  // pour ne pas traverser les tables
 const SEUIL_GLISSE = 10;    // pixels : au-delà, c'est un glissé et pas un toucher
 const DISTANCE_PAROLE = 5;  // plus loin que ça, on s'approche d'abord
+const RAYON_JOYSTICK = 55;  // pixels
 
 export class Controles {
   constructor(camera, element, salle, scene, acteurs) {
@@ -20,7 +21,9 @@ export class Controles {
     this.cible = null;
     this.hauteurSol = salle.hauteurSol(this.position.x, this.position.z);
     this.balancement = 0;
-    this.doigt = null;
+    this.doigts = new Map();
+    this.joystick = new THREE.Vector2();   // -1 à 1 dans chaque sens
+    this.marche = false;
     this.raycaster = new THREE.Raycaster();
     this.surPremierGeste = null;
     this.surParler = null;      // appelé quand on aborde un personnage
@@ -40,26 +43,54 @@ export class Controles {
     element.addEventListener('pointerdown', (e) => this.appui(e));
     element.addEventListener('pointermove', (e) => this.mouvement(e));
     element.addEventListener('pointerup', (e) => this.relache(e));
-    element.addEventListener('pointercancel', () => { this.doigt = null; });
+    element.addEventListener('pointercancel', (e) => {
+      const d = this.doigts.get(e.pointerId);
+      this.doigts.delete(e.pointerId);
+      if (d?.role === 'joystick') this.cacherJoystick();
+    });
+
+    // Le joystick : un cercle qui apparaît sous le pouce gauche
+    this.elJoystick = document.createElement('div');
+    this.elJoystick.className = 'joystick';
+    this.elBouton = document.createElement('div');
+    this.elJoystick.appendChild(this.elBouton);
+    document.body.appendChild(this.elJoystick);
     element.addEventListener('contextmenu', (e) => e.preventDefault());
   }
 
+  // Chaque doigt a un rôle : à gauche de l'écran il pilote le joystick, à droite il fait regarder.
+  // Un simple toucher (sans glisser) fait marcher ou parler, des deux côtés.
   appui(e) {
-    if (this.doigt || this.enDialogue) return; // on ne suit qu'un doigt à la fois
-    this.doigt = { id: e.pointerId, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, glisse: false };
+    if (this.enDialogue) return;
+    const role = e.clientX < window.innerWidth / 2 ? 'joystick' : 'regard';
+    if ([...this.doigts.values()].some((d) => d.role === role)) return; // un doigt par côté
+    this.doigts.set(e.pointerId, { role, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, glisse: false });
     this.element.setPointerCapture?.(e.pointerId);
   }
 
   mouvement(e) {
-    const d = this.doigt;
-    if (!d || d.id !== e.pointerId) return;
-    if (!d.glisse && Math.hypot(e.clientX - d.x0, e.clientY - d.y0) > SEUIL_GLISSE) d.glisse = true;
+    const d = this.doigts.get(e.pointerId);
+    if (!d) return;
+    if (!d.glisse && Math.hypot(e.clientX - d.x0, e.clientY - d.y0) > SEUIL_GLISSE) {
+      d.glisse = true;
+      if (d.role === 'joystick') this.montrerJoystick(d.x0, d.y0);
+    }
     if (d.glisse) {
-      const largeur = Math.max(window.innerWidth, 1);
-      const echelle = (Math.PI * 0.8) / largeur;
-      this.lacet -= (e.clientX - d.x) * echelle;
-      this.tangage -= (e.clientY - d.y) * echelle;
-      this.tangage = Math.max(-1.2, Math.min(1.2, this.tangage));
+      if (d.role === 'regard') {
+        const largeur = Math.max(window.innerWidth, 1);
+        const echelle = (Math.PI * 0.8) / largeur;
+        this.lacet -= (e.clientX - d.x) * echelle;
+        this.tangage -= (e.clientY - d.y) * echelle;
+        this.tangage = Math.max(-1.2, Math.min(1.2, this.tangage));
+      } else {
+        let jx = e.clientX - d.x0, jy = e.clientY - d.y0;
+        const l = Math.hypot(jx, jy);
+        if (l > RAYON_JOYSTICK) { jx *= RAYON_JOYSTICK / l; jy *= RAYON_JOYSTICK / l; }
+        this.joystick.set(jx / RAYON_JOYSTICK, jy / RAYON_JOYSTICK);
+        this.elBouton.style.transform = `translate(${jx}px, ${jy}px)`;
+        this.cible = null;
+        this.aParler = null;
+      }
       this.geste();
     }
     d.x = e.clientX;
@@ -67,10 +98,28 @@ export class Controles {
   }
 
   relache(e) {
-    const d = this.doigt;
-    if (!d || d.id !== e.pointerId) return;
-    this.doigt = null;
+    const d = this.doigts.get(e.pointerId);
+    if (!d) return;
+    this.doigts.delete(e.pointerId);
+    if (d.role === 'joystick') this.cacherJoystick();
     if (!d.glisse && !this.enDialogue) this.toucher(e.clientX, e.clientY);
+  }
+
+  lacherTout() {
+    this.doigts.clear();
+    this.cacherJoystick();
+  }
+
+  montrerJoystick(x, y) {
+    this.elJoystick.style.left = `${x}px`;
+    this.elJoystick.style.top = `${y}px`;
+    this.elJoystick.classList.add('visible');
+  }
+
+  cacherJoystick() {
+    this.joystick.set(0, 0);
+    this.elJoystick.classList.remove('visible');
+    this.elBouton.style.transform = '';
   }
 
   toucher(x, y) {
@@ -129,9 +178,26 @@ export class Controles {
     return false;
   }
 
+  essayer(nx, nz) {
+    if (!this.bloque(nx, nz)) { this.position.x = nx; this.position.z = nz; return true; }
+    if (!this.bloque(nx, this.position.z)) { this.position.x = nx; return true; }
+    if (!this.bloque(this.position.x, nz)) { this.position.z = nz; return true; }
+    return false;
+  }
+
   mettreAJour(dt, t) {
     let marche = false;
-    if (this.cible) {
+    const j = this.joystick;
+    const force = Math.min(1, j.length());
+    if (force > 0.15 && !this.enDialogue) {
+      // avant = vers où l'on regarde, droite = sur le côté
+      const avant = -j.y, cote = j.x;
+      const sin = Math.sin(this.lacet), cos = Math.cos(this.lacet);
+      const vx = -sin * avant + cos * cote, vz = -cos * avant - sin * cote;
+      const l = Math.hypot(vx, vz) || 1;
+      const pas = VITESSE * force * dt;
+      marche = this.essayer(this.position.x + (vx / l) * pas, this.position.z + (vz / l) * pas);
+    } else if (this.cible) {
       const dx = this.cible.x - this.position.x;
       const dz = this.cible.z - this.position.z;
       const dist = Math.hypot(dx, dz);
@@ -141,9 +207,7 @@ export class Controles {
         const pas = Math.min(dist, VITESSE * dt);
         const nx = this.position.x + (dx / dist) * pas;
         const nz = this.position.z + (dz / dist) * pas;
-        if (!this.bloque(nx, nz)) { this.position.x = nx; this.position.z = nz; marche = true; }
-        else if (!this.bloque(nx, this.position.z)) { this.position.x = nx; marche = true; }
-        else if (!this.bloque(this.position.x, nz)) { this.position.z = nz; marche = true; }
+        if (this.essayer(nx, nz)) marche = true;
         else this.cible = null; // coincé : on s'arrête
       }
     }
@@ -158,6 +222,7 @@ export class Controles {
     const sol = this.salle.hauteurSol(this.position.x, this.position.z);
     this.hauteurSol += (sol - this.hauteurSol) * Math.min(1, dt * 8);
 
+    this.marche = marche;
     // Léger balancement de la tête en marchant
     if (marche) this.balancement += dt * 9;
     const bob = marche ? Math.sin(this.balancement) * 0.035 : 0;
