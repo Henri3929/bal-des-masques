@@ -19,6 +19,7 @@ Jeu narratif solo en 3D, vue à la première personne, dans le château d'une é
 
 ## Structure
 - index.html : point d'entrée
+- manifest.webmanifest, sw.js, icones/ : installation sur l'écran d'accueil
 - moteur/ : 3D, caméra, contrôles, interface
 - salles/ : un fichier par salle
 - personnages/ : modèles et emplois du temps
@@ -33,4 +34,4 @@ Jeu narratif solo en 3D, vue à la première personne, dans le château d'une é
 5. Les autres salles, une par une
 
 ## Étape en cours
-Étape 1 : faite. Étape 2 : à démarrer.
+Étape 1 : faite. Étape 2 : faite (Grande Salle de nuit, bougies flottantes, jeu installable). Étape 3 : à démarrer.
