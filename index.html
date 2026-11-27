@@ -44,8 +44,17 @@
     #dialogue .choix button:active { background: rgba(232,207,140,.3); }
     #dialogue .suite { position: absolute; right: 14px; bottom: 8px; font-size: .8rem; opacity: .7; animation: pulse 1.4s ease-in-out infinite; }
 
-    /* bouton jour / nuit (pour tester) */
-    #moment { position: fixed; top: calc(12px + env(safe-area-inset-top)); right: 12px; z-index: 1; width: 46px; height: 46px;
+    /* joystick : apparaît sous le pouce gauche */
+    .joystick { position: fixed; z-index: 1; width: 110px; height: 110px; margin: -55px 0 0 -55px; border-radius: 50%;
+      border: 2px solid rgba(232,207,140,.35); background: rgba(14,10,20,.25); pointer-events: none; opacity: 0; transition: opacity .15s; }
+    .joystick.visible { opacity: 1; }
+    .joystick div { position: absolute; left: 50%; top: 50%; width: 48px; height: 48px; margin: -24px 0 0 -24px; border-radius: 50%;
+      background: rgba(232,207,140,.55); box-shadow: 0 0 12px rgba(0,0,0,.5); }
+
+    /* boutons ronds en haut à droite : son, jour / nuit (pour tester) */
+    #son { right: 66px; }
+    #moment { right: 12px; }
+    .rond { position: fixed; top: calc(12px + env(safe-area-inset-top)); z-index: 1; width: 46px; height: 46px;
       border-radius: 50%; border: 1px solid rgba(232,207,140,.45); background: rgba(14,10,20,.6); font-size: 1.4rem;
       line-height: 1; cursor: pointer; transition: opacity .3s; }
   </style>
@@ -63,12 +72,13 @@
   </div>
 
   <div id="aide" class="ecran">
-    <p>Touche le sol pour marcher</p>
-    <p>Glisse le doigt pour regarder</p>
+    <p>Pouce gauche : marcher</p>
+    <p>Glisse à droite : regarder</p>
     <p>Touche quelqu'un pour lui parler</p>
   </div>
 
-  <button id="moment" class="cache" aria-label="Jour ou nuit">🌙</button>
+  <button id="son" class="rond cache" aria-label="Son">🔊</button>
+  <button id="moment" class="rond cache" aria-label="Jour ou nuit">🌙</button>
 
   <script type="module">
     const accueil = document.getElementById('accueil');
@@ -83,11 +93,17 @@
       const bouton = document.getElementById('moment');
       const majBouton = () => { bouton.textContent = jeu.moment === 'jour' ? '🌙' : '☀️'; };
       bouton.addEventListener('click', () => { jeu.reglerMoment(jeu.moment === 'jour' ? 'nuit' : 'jour'); majBouton(); });
-      jeu.surDialogue = (ouvert) => bouton.classList.toggle('cache', ouvert);
+      const boutonSon = document.getElementById('son');
+      const majSon = () => { boutonSon.textContent = jeu.son.actif ? '🔊' : '🔇'; };
+      boutonSon.addEventListener('click', () => { jeu.son.demarrer(); jeu.son.basculer(); majSon(); });
+      jeu.surDialogue = (ouvert) => { bouton.classList.toggle('cache', ouvert); boutonSon.classList.toggle('cache', ouvert); };
       majBouton();
+      majSon();
       accueil.addEventListener('click', () => {
+        jeu.son.demarrer();
         accueil.classList.add('cache');
         bouton.classList.remove('cache');
+        boutonSon.classList.remove('cache');
         aide.style.opacity = 1;
         jeu.controles.surPremierGeste = () => setTimeout(() => aide.classList.add('cache'), 1500);
       }, { once: true });
