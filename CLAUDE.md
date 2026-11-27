@@ -13,7 +13,8 @@ Jeu narratif solo en 3D, vue à la première personne, dans le château d'une é
 ## Technique
 - Appli web jouable sur téléphone, installable sur l'écran d'accueil, hébergée gratuitement sur GitHub Pages.
 - Three.js, style low-poly, léger pour mobile.
-- Contrôles tactiles sans flèches à l'écran : toucher le sol pour marcher, glisser le doigt pour regarder, toucher un personnage pour parler.
+- Téléphone tenu en largeur (paysage).
+- Contrôles tactiles : deux joysticks mobiles qui apparaissent sous le pouce. Moitié gauche de l'écran = marcher, moitié droite = regarder (gauche, droite, haut, bas). Toucher un personnage pour parler. Pas de « toucher le sol pour marcher ».
 - Sauvegarde locale sur le téléphone, pas de serveur.
 - Assets gratuits (Kenney, Quaternius) si besoin, sinon formes simples.
 
@@ -29,7 +30,7 @@ Jeu narratif solo en 3D, vue à la première personne, dans le château d'une é
 ## Feuille de route
 1. Mise en place : structure des dossiers, GitHub Pages
 2. Prototype : la Grande Salle en 3D, déplacement et regard, testable sur téléphone
-3. 3-4 personnages avec leur objet distinctif, et les dialogues
+3. Joysticks (remplacent le toucher du sol), puis 3-4 personnages avec leur objet distinctif, et les dialogues
 4. Branchement du scénario complet
 5. Les autres salles, une par une
 
